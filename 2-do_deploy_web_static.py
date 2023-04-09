@@ -1,36 +1,44 @@
 #!/usr/bin/python3
-"""decompress webstatic package"""
+"""bric script that generates a .tgz archive from the
+   contents of the web_static folder
+"""
+from datetime import datetime
 from fabric.api import *
-import os
+import os.path
 
 
 env.hosts = ['54.152.54.253', '100.25.48.219']
 env.user = 'ubuntu'
-env.key_filename = '~/.ssh/p_key'
+
 
 def do_deploy(archive_path):
+    """Distributes an archive to my servers.
+       Args:
+        archive_path: Path to an achrived file.
     """
-    make sure he archive path exists
-    """
-    try:
-        if not os.path.exists(archive_path):
+    #  check if archive exist
+    if os.path.isfile(archive_path):
+        try:
+            #  Upload the archive to remote /tmp/
+            put("{}".format(archive_path), "/tmp/")
+            release = '/data/web_static/releases/'
+            current = "/data/web_static/current"
+            arch = archive_path.split('/')[1].split('.')[0]
+            #  Uncompressed archive
+            run("mkdir -p {}{}/".format(release, arch))
+            run("tar -xzf /tmp/{} -C {}{}/".format(archive_path.split('/')[1], release,arch))
+            #  Delete the archive
+            run("rm /tmp/{}".format(archive_path.split('/')[1]))
+            # Move Uncompressed files 
+            run("mv {}{}/web_static/* {}{}".format(release, arch, release, arch))
+            run("rm -rf {}{}/web_static/".format(release, arch))
+            #  Delete current link
+            run("rm -rf {}".format(current))
+            #  Create a new the link
+            run("ln -sf {}{} {}".format(release, arch, current))
+            return True
+        except Exception as e:
             return False
-        #upload the archive to the /tmp directory
-        put(archive_path, '/tmp/')
-        #get the archive name without the extension
-        arch_name = archive_path[-18:-4]
-        #uncompress the archive to the folder specified
-        run("sudo mkdir -p /data/web_static/releases/{}".format(arch_name))
-        run("sudo tar -xzf /tmp/{}.tgz -C /data/web_static/\
-releases/{}/".format(arch_name, arch_name))
-        #Delete the archive from the web server
-        run("sudo rm -rf /tmp/{}.tgz".format(arch_name))
-        #delete the symbolic link /data/web_static/current
-        run("sudo rm -rf /data/web_static/current")
-        #Create a new the symbolic link
-        run("sudo ln -s /data/web_static/releases/{}/\
- /data/web_static/current".format(arch_name))
-    except:
+    else:
         return False
-    #return true on success
-    return True
+
