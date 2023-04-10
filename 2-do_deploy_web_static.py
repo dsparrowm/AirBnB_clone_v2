@@ -26,11 +26,13 @@ def do_deploy(archive_path):
             arch = archive_path.split('/')[1].split('.')[0]
             #  Uncompressed archive
             run("mkdir -p {}{}/".format(release, arch))
-            run("tar -xzf /tmp/{} -C {}{}/".format(archive_path.split('/')[1], release,arch))
+            run("tar -xzf /tmp/{} -C {}{}/"
+                .format(archive_path.split('/')[1], release,arch))
             #  Delete the archive
             run("rm /tmp/{}".format(archive_path.split('/')[1]))
             # Move Uncompressed files 
-            run("mv {}{}/web_static/* {}{}".format(release, arch, release, arch))
+            run("mv {}{}/web_static/* {}{}"
+                .format(release, arch, release, arch))
             run("rm -rf {}{}/web_static/".format(release, arch))
             #  Delete current link
             run("rm -rf {}".format(current))
