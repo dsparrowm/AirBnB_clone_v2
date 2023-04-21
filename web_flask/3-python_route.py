@@ -11,7 +11,7 @@ def index():
     return "Hello HBNB!"
 
 
-@app.route('/python/<text>', strict_slashes=False)
+@app.route('/python/(<text>)', strict_slashes=False)
 def python_lang(text="is cool"):
     new_word = text.replace('_', ' ')
     return "Python {}".format(new_word)
