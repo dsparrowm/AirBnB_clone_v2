@@ -2,6 +2,7 @@
 """ State Module for HBNB project """
 from models.base_model import BaseModel, Base
 from models.city import City
+from os import getenv
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 from models import storage_type
@@ -17,16 +18,17 @@ class State(BaseModel, Base):
     else:
         name = ''
 
-    @property
-    def cities(self):
-        """Returns the list of City instances with state_id equals
-           to the current State.id => It will be the FileStorage
-           relationship between State and City
-        """
-        from models import storage
-        filtered_cities = []
-        cities = storage.all(City)
-        for city in cities.values():
-            if city.state_id == self.id:
-                filtered_cities.append(city)
-        return filtered_cities  # returns cities with same state id
+    if getenv('HBNB_STORAGE_TYPE') != 'db':
+        @property
+        def cities(self):
+            """Returns the list of City instances with state_id equals
+            to the current State.id => It will be the FileStorage
+            relationship between State and City
+            """
+            from models import storage
+            filtered_cities = []
+            cities = storage.all(City)
+            for city in cities.values():
+                if city.state_id == self.id:
+                    filtered_cities.append(city)
+            return filtered_cities  # returns cities with same state id

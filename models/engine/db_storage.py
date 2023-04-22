@@ -68,6 +68,10 @@ class DBStorage:
             except Exception as e:
                 pass
 
+    def close(self):
+        """remove the current session"""
+        self.__session.remove()
+
     def save(self):
         """Commit all changes of the current db session
            (self.__session)
